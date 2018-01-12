@@ -64,16 +64,31 @@ class HashableDict(dict):
 
     This is not generally useful, but created specifically to hold the ``conv``
     parameter that needs to be passed to MySQLdb.
+
+    Thanks to `Alex Martelli`_ for the implementation.
+
+    .. _Alex Martelli: https://stackoverflow.com/a/1151686
     """
+
+    def __key(self):
+        return tuple((k, self[k]) for k in sorted(self))
 
     def __hash__(self):
         """Calculate the hash of this ``dict``.
 
-        The hash is determined by converting to a sorted tuple of key-value
-        pairs and hashing that.
+        The hash is determined by converting to a sorted tuple of
+        key-value pairs and hashing that.
         """
-        items = [(n, tuple(v)) for n, v in self.items if isiterable(v)]
-        return hash(tuple(items))
+        return hash(self.__key())
+
+    def __eq__(self, other):
+        """Determine whether ``other`` is equal to this ``dict``.
+
+        The implementation of this comparison uses the same underlying
+        mechanism as ``__hash__``, in order to guarantee that ``==`` and
+        ``.hash`` are in sync.
+        """
+        return self.__key() == other.__key()
 
 
 # Define this here so Django can import it.
