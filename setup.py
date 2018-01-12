@@ -15,7 +15,7 @@ from setuptools import setup, find_packages
 
 
 REQUIRES = [
-    "sqlalchemy >=0.7, <1.0",
+    "SQLAlchemy >=1.0, <2.0",
 ]
 
 
