@@ -5,12 +5,7 @@
 from __future__ import (absolute_import, print_function, unicode_literals,
                         division)
 
-# Make ``Foo()`` work the same in Python 2 as it does in Python 3.
-__metaclass__ = type
-
-
 import os
-
 
 from django.conf import settings
 from django.db.backends.mysql import base
@@ -20,6 +15,10 @@ try:
     import sqlalchemy.pool as pool
 except ImportError as e:
     raise ImproperlyConfigured("Error loading SQLAlchemy module: %s" % e)
+
+
+# Make ``Foo()`` work the same in Python 2 as it does in Python 3.
+__metaclass__ = type
 
 
 # Global variable to hold the actual connection pool.
