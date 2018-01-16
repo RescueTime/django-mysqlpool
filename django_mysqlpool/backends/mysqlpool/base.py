@@ -5,6 +5,7 @@
 from __future__ import (absolute_import, print_function, unicode_literals,
                         division)
 
+import collections
 import os
 
 from django.conf import settings
@@ -31,15 +32,6 @@ DEFAULT_BACKEND = 'QueuePool'
 DEFAULT_POOL_TIMEOUT = 119
 
 
-def isiterable(value):
-    """Determine whether ``value`` is iterable."""
-    try:
-        iter(value)
-        return True
-    except TypeError:
-        return False
-
-
 class OldDatabaseProxy():
 
     """Saves a reference to the old connect function.
@@ -57,20 +49,34 @@ class OldDatabaseProxy():
         return self.old_connect(**kwargs)
 
 
-class HashableDict(dict):
+class HashableDict(collections.OrderedDict):
 
     """A dictionary that is hashable.
 
     This is not generally useful, but created specifically to hold the ``conv``
     parameter that needs to be passed to MySQLdb.
 
-    Thanks to `Alex Martelli`_ for the implementation.
+    HT to `Alex Martelli`_ for the idea of using a shared ``__key`` function.
 
     .. _Alex Martelli: https://stackoverflow.com/a/1151686
     """
 
+    @staticmethod
+    def _is_iterable(test_me):
+        """Determine whether ``test_me`` is iterable."""
+        try:
+            iter(test_me)
+            return True
+        except TypeError:
+            return False
+
+    @staticmethod
+    def _tuplefy_as_needed(val):
+        return tuple(val) if HashableDict._is_iterable(val) else val
+
     def __key(self):
-        return tuple((k, self[k]) for k in sorted(self))
+        return tuple((k, HashableDict._tuplefy_as_needed(v))
+                     for k, v in self.items())
 
     def __hash__(self):
         """Calculate the hash of this ``dict``.
